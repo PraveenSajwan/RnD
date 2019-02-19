@@ -1,0 +1,47 @@
+<html>
+<head>
+<script type ="text/javascript">
+var holdTime = 0;
+var keyDown_keydownTime = 0;
+var keyup_keydownTime = 0;
+function processKeyDown() {
+    if (!holdTime) {
+        holdTime = (new Date()).getTime();
+    }
+	
+	if (!keyDown_keydownTime) {
+        keyDown_keydownTime = (new Date()).getTime();
+    }
+	else{
+	var delta = (new Date()).getTime() - keyDown_keydownTime;
+    document.getElementById("keyDown_keydownTime").innerHTML = delta + " ms";
+    keyDown_keydownTime = 0;
+	}
+	
+	if (keyup_keydownTime)
+	{
+	var delta = (new Date()).getTime() - keyup_keydownTime;
+    document.getElementById("keyup_keydownTime").innerHTML = delta + " ms";
+    keyup_keydownTime = 0;
+	}
+}
+
+function processKeyUp() {
+    var delta = (new Date()).getTime() - holdTime;
+    document.getElementById("holdTime").innerHTML = delta + " ms";
+    holdTime = 0;
+	
+	if (!keyup_keydownTime) {
+        keyup_keydownTime = (new Date()).getTime();
+    }
+}
+</script>
+</head>
+<body>
+<input type="text" onkeydown="processKeyDown()" onkeyup="processKeyUp()"><br/>
+Hold Time: <label id='holdTime'></label> <br/>
+KeyDown KeyDown Time: <label id='keyDown_keydownTime'></label> <br/>
+KeyUp KeyDown Time: <label id='keyup_keydownTime'></label>
+</input
+</body>
+</html>
