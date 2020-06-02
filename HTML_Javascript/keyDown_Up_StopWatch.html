@@ -4,7 +4,19 @@
 var holdTime = 0;
 var keyDown_keydownTime = 0;
 var keyup_keydownTime = 0;
-function processKeyDown() {
+var prev_key;
+var key;
+var csv_header = "";
+var csv_val = "";
+function processKeyDown(e) {
+	var keynum;
+    if(window.event) { // IE                    
+      keynum = e.keyCode;
+    } else if(e.which){ // Netscape/Firefox/Opera                   
+      keynum = e.which;
+    }
+    key = String.fromCharCode(keynum);
+	
     if (!holdTime) {
         holdTime = (new Date()).getTime();
     }
@@ -15,6 +27,8 @@ function processKeyDown() {
 	else{
 	var delta = (new Date()).getTime() - keyDown_keydownTime;
     document.getElementById("keyDown_keydownTime").innerHTML = delta + " ms";
+	csv_header += "DD." + prev_key + "." + key + ",";
+	csv_val += delta + ",";
     keyDown_keydownTime = 0;
 	}
 	
@@ -22,6 +36,8 @@ function processKeyDown() {
 	{
 	var delta = (new Date()).getTime() - keyup_keydownTime;
     document.getElementById("keyup_keydownTime").innerHTML = delta + " ms";
+	csv_header += "UD." + prev_key + "." + key + ",";
+	csv_val += delta + ",";
     keyup_keydownTime = 0;
 	}
 }
@@ -29,19 +45,34 @@ function processKeyDown() {
 function processKeyUp() {
     var delta = (new Date()).getTime() - holdTime;
     document.getElementById("holdTime").innerHTML = delta + " ms";
+	csv_header += "H." + key + ",";
+	csv_val += delta + ",";
     holdTime = 0;
 	
 	if (!keyup_keydownTime) {
         keyup_keydownTime = (new Date()).getTime();
+		prev_key = key;
     }
+}
+ 
+function download_csv() {
+    var csv = csv_header + "\n";
+	csv += csv_val + "\n";
+    console.log(csv);
+    var hiddenElement = document.createElement('a');
+    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+    hiddenElement.target = '_blank';
+    hiddenElement.download = 'pattern.csv';
+    hiddenElement.click();
 }
 </script>
 </head>
 <body>
-<input type="text" onkeydown="processKeyDown()" onkeyup="processKeyUp()"><br/>
+<input type="text" onkeydown="processKeyDown(event)" onkeyup="processKeyUp()"><br/>
 Hold Time: <label id='holdTime'></label> <br/>
 KeyDown KeyDown Time: <label id='keyDown_keydownTime'></label> <br/>
 KeyUp KeyDown Time: <label id='keyup_keydownTime'></label>
-</input
+</input>
+<button onclick="download_csv()">Download CSV</button> 
 </body>
 </html>

@@ -1,0 +1,79 @@
+<html>
+<head>
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.min.js">
+</script>
+</head>
+<body>
+<input type="text" id="txtinput"/><br/>
+Hold Time: <label id="holdTime"></label> <br/>
+KeyDown KeyDown Time: <label id="keyDown_keydownTime"></label> <br/>
+KeyUp KeyDown Time: <label id="keyup_keydownTime"/></label> <br/>
+<button>Download CSV</button> 
+<script>
+$(document).ready(function(){
+		var holdTime = 0;
+		var keyDown_keydownTime = 0;
+		var keyup_keydownTime = 0;
+		var prev_key;
+		var key;
+		var csv_header = "";
+		var csv_val = "";
+		
+		$('#txtinput').keydown(function(event){
+			var keynum;
+			keynum = (event.keyCode ? event.keyCode : event.which);
+			key = String.fromCharCode(keynum);
+			
+			if (!holdTime) {
+				holdTime = (new Date()).getTime();
+			}
+			
+			if (!keyDown_keydownTime) {
+				keyDown_keydownTime = (new Date()).getTime();
+			}
+			else{
+			var delta = (new Date()).getTime() - keyDown_keydownTime;
+			$('#keyDown_keydownTime').html(delta + " ms");
+			csv_header += "DD." + prev_key + "." + key + ",";
+			csv_val += delta + ",";
+			keyDown_keydownTime = 0;
+			}
+			
+			if (keyup_keydownTime)
+			{
+			var delta = (new Date()).getTime() - keyup_keydownTime;
+			$('#keyup_keydownTime').html(delta + " ms");
+			csv_header += "UD." + prev_key + "." + key + ",";
+			csv_val += delta + ",";
+			keyup_keydownTime = 0;
+			}
+		});
+		
+		$("input").keyup(function(event){
+			var delta = (new Date()).getTime() - holdTime;
+			$('#holdTime').html(delta + " ms");
+			csv_header += "H." + key + ",";
+			csv_val += delta + ",";
+			holdTime = 0;
+			
+			if (!keyup_keydownTime) {
+				keyup_keydownTime = (new Date()).getTime();
+				prev_key = key;
+			}
+		});
+		
+		$('button').click(function(){
+			var csv = csv_header + "\n";
+			csv += csv_val + "\n";
+			console.log(csv);
+			var hiddenElement = document.createElement('a');
+			hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+			hiddenElement.target = '_blank';
+			hiddenElement.download = 'pattern.csv';
+			hiddenElement.click();
+		});
+});	
+</script>
+
+</body>
+</html>
