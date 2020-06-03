@@ -10,7 +10,7 @@ namespace VerifyAdharApi.Services
     public class MigrantService
     {
         private readonly IMongoCollection<Migrant> _migrants;
-        private readonly Dictionary<long, Dictionary<decimal, decimal>> _coordinatesData;
+        private readonly Dictionary<long, Tuple<decimal, decimal>> _coordinatesData;
 
         public MigrantService(IMongoSettings settings)
         {
@@ -47,15 +47,15 @@ namespace VerifyAdharApi.Services
             var coordinates = _coordinatesData.FirstOrDefault(t => t.Key == pincode).Value;
             var migrants = Get().Where(t => t.PinCode == pincode).Count();
             var data = new Coordinates();
-            data.Latitude = coordinates.FirstOrDefault().Key;
-            data.Longitude = coordinates.FirstOrDefault().Value;
+            data.Latitude = coordinates.Item1;
+            data.Longitude = coordinates.Item2;
             data.Count = migrants;
             return data;
         }
 
-        private Dictionary<long, Dictionary<decimal, decimal>> GetLatitudeLongitudeInfo()
+        private Dictionary<long, Tuple<decimal, decimal>> GetLatitudeLongitudeInfo()
         {
-            var info = new Dictionary<long, Dictionary<decimal, decimal>>();
+            var info = new Dictionary<long, Tuple<decimal, decimal>>();
             using (TextFieldParser parser = new TextFieldParser(@"Resources\Latitute_Longitude.csv"))
             {
                 parser.TextFieldType = FieldType.Delimited;
@@ -64,8 +64,7 @@ namespace VerifyAdharApi.Services
                 {
                     //Processing row
                     string[] fields = parser.ReadFields();
-                    var latitudeLogitude = new Dictionary<decimal, decimal>();
-                    latitudeLogitude.Add(Convert.ToDecimal(fields[1]), Convert.ToDecimal(fields[2]));
+                    var latitudeLogitude = new Tuple<decimal, decimal>(Convert.ToDecimal(fields[1]), Convert.ToDecimal(fields[2]));
                     info.Add(Convert.ToInt64(fields[0]), latitudeLogitude);
                 }
             }
