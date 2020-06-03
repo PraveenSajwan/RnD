@@ -14,10 +14,11 @@ namespace VerifyAdharApi.Models
         [JsonProperty("Name")]
         public string Name { get; set; }
 
-        public string AadharNumber { get; set; }
+        public long AadharNumber { get; set; }
 
-        public string Phone { get; set; }
+        public long Phone { get; set; }
         public string Address { get; set; }
+        public long PinCode { get; set; }
 
         public List<string> Skill { get; set; }
     }

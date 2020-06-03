@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using VerifyAdharApi.Filters;
 using VerifyAdharApi.Models;
 using VerifyAdharApi.Services;
 
@@ -17,8 +18,17 @@ namespace VerifyAdharApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Migrant>> Get() =>
-            _migrantService.Get();
+        [Route("GetStatus")]
+        public ActionResult<string> GetStatus()
+        {
+            return "Hello, Web Service is working.";
+        }
+
+        [HttpGet]
+        public ActionResult<List<Migrant>> Get()
+        {
+            return _migrantService.Get();
+        }
 
         [Route("{id}")]
         [HttpGet("{id:length(24)}", Name = "GetMigrant")]
@@ -35,11 +45,18 @@ namespace VerifyAdharApi.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Migrant> Create([FromBody] Migrant migrant)
+        public ActionResult<bool> Create([FromBody] Migrant migrant)
         {
+            AdhaarIdFilter af = new AdhaarIdFilter();
+            if (!af.IsValidAadhaarNumber(migrant.AadharNumber))
+            {
+                return false;
+            }
+
             _migrantService.Create(migrant);
 
-            return CreatedAtRoute("GetMigrant", new { id = migrant.Id.ToString() }, migrant);
+            // return CreatedAtRoute("GetMigrant", new { id = migrant.Id.ToString() }, migrant);
+            return true;
         }
 
         [Route("{id}")]
@@ -72,6 +89,20 @@ namespace VerifyAdharApi.Controllers
             _migrantService.Remove(migrant.Id);
 
             return NoContent();
+        }
+
+        [Route("{pincode}")]
+        [HttpGet()]
+        public ActionResult<Coordinates> Get(long pincode)
+        {
+            var data = _migrantService.GetLatitudeLongitudeWithMigrantsCount(pincode);
+
+            if (data == null)
+            {
+                return NotFound();
+            }
+
+            return data;
         }
     }
 }
