@@ -81,6 +81,11 @@ namespace VerifyAdharApi.Services
             migrant.State = completeInfo["state_name"];
         }
 
+        public List<Migrant> GetStateWiseData(string state)
+        {
+            return Get().Where(t => t.State.ToLower() == state.ToLower()).ToList();
+        }
+
         private Dictionary<long, Tuple<decimal, decimal>> GetLatitudeLongitudeInfo()
         {
             var info = new Dictionary<long, Tuple<decimal, decimal>>();

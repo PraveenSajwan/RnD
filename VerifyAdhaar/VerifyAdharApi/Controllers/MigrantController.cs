@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using VerifyAdharApi.Filters;
 using VerifyAdharApi.Models;
@@ -47,15 +48,22 @@ namespace VerifyAdharApi.Controllers
         [HttpPost]
         public ActionResult<bool> Create([FromBody] Migrant migrant)
         {
-            AdhaarIdFilter af = new AdhaarIdFilter();
-            if (!af.IsValidAadhaarNumber(migrant.AadharNumber))
+            try
+            {
+                AdhaarIdFilter af = new AdhaarIdFilter();
+                if (!af.IsValidAadhaarNumber(migrant.AadharNumber))
+                {
+                    return false;
+                }
+                _migrantService.UpdateMigrantWithStateAndDistrict(out migrant, migrant);
+                _migrantService.Create(migrant);
+
+                return true;
+            }
+            catch(Exception ex)
             {
                 return false;
             }
-            _migrantService.UpdateMigrantWithStateAndDistrict(out migrant, migrant);
-            _migrantService.Create(migrant);
-
-            return true;
         }
 
         [Route("{id}")]
@@ -95,6 +103,20 @@ namespace VerifyAdharApi.Controllers
         public ActionResult<Coordinates> Get(long pincode)
         {
             var data = _migrantService.GetLatitudeLongitudeWithMigrantsCount(pincode);
+
+            if (data == null)
+            {
+                return NotFound();
+            }
+
+            return data;
+        }
+
+        [Route("statewise/{state}")]
+        [HttpGet()]
+        public ActionResult<List<Migrant>> GetMigrantsDataStateWise(string state)
+        {
+            var data = _migrantService.GetStateWiseData(state);
 
             if (data == null)
             {
