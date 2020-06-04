@@ -10,16 +10,14 @@ namespace VerifyAdharApi.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
-
         [JsonProperty("Name")]
         public string Name { get; set; }
-
         public long AadharNumber { get; set; }
-
         public long Phone { get; set; }
         public string Address { get; set; }
         public long PinCode { get; set; }
-
+        public string District { get; set; }
+        public string State { get; set; }
         public List<string> Skill { get; set; }
     }
 }

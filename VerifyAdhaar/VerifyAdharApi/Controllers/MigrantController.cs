@@ -52,10 +52,9 @@ namespace VerifyAdharApi.Controllers
             {
                 return false;
             }
-
+            _migrantService.UpdateMigrantWithStateAndDistrict(out migrant, migrant);
             _migrantService.Create(migrant);
 
-            // return CreatedAtRoute("GetMigrant", new { id = migrant.Id.ToString() }, migrant);
             return true;
         }
 

@@ -1,8 +1,13 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using MongoDB.Driver;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Web.Http;
 using VerifyAdharApi.Models;
 
 namespace VerifyAdharApi.Services
@@ -51,6 +56,29 @@ namespace VerifyAdharApi.Services
             data.Longitude = coordinates.Item2;
             data.Count = migrants;
             return data;
+        }
+
+        public void UpdateMigrantWithStateAndDistrict(out Migrant migrant, Migrant existingMigrant)
+        {
+            migrant = existingMigrant;
+            var completeInfo = new Dictionary<string, string>();
+            var client = new RestClient($"https://pincode.saratchandra.in/api/pincode/{migrant.PinCode}");
+            var request = new RestRequest(Method.GET);
+            IRestResponse response = client.Execute(request);
+            if(response.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+            object obj = JsonConvert.DeserializeObject<object>(response.Content);
+            var list = JObject.FromObject(obj).SelectToken("data[0]").ToList();
+            foreach(JProperty listitem in list)
+            {
+                var key = listitem.Name;
+                var value = ((JValue)listitem.First).Value;
+                completeInfo.Add(key, value.ToString());
+            }
+            migrant.District = completeInfo["district"];
+            migrant.State = completeInfo["state_name"];
         }
 
         private Dictionary<long, Tuple<decimal, decimal>> GetLatitudeLongitudeInfo()
